@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>wuyi's blog | wuyi's blog</title><meta name="author" content="wuyi"><meta name="copyright" content="wuyi"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1.1_5中断和异常用户态-》核心态：中断是唯一途径 核心态-》用户态：通过特权指令，将程序状态字（PSW）的标志位设置为用户态。 中断分类： 内中断：CPU内部发生（异常、陷入、例外） 外中断：用户干预或外设请求 2.2_3调度算法的评价指标1.CPU利用率利用率&#x3D;CPU忙碌时间&#x2F;总时间 2.系统吞吐量指单位时间内完成作业的数量 系统吞吐量&#x3D;总共完成了多少道作业&#x2F;总共花了多少时间（道&#x2F;秒） 3.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wuyi&#39;s blog">
+<meta property="og:url" content="http://example.com/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%A6%81%E7%82%B9/index.html">
+<meta property="og:site_name" content="wuyi&#39;s blog">
+<meta property="og:description" content="1.1_5中断和异常用户态-》核心态：中断是唯一途径 核心态-》用户态：通过特权指令，将程序状态字（PSW）的标志位设置为用户态。 中断分类： 内中断：CPU内部发生（异常、陷入、例外） 外中断：用户干预或外设请求 2.2_3调度算法的评价指标1.CPU利用率利用率&#x3D;CPU忙碌时间&#x2F;总时间 2.系统吞吐量指单位时间内完成作业的数量 系统吞吐量&#x3D;总共完成了多少道作业&#x2F;总共花了多少时间（道&#x2F;秒） 3.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+<meta property="article:published_time" content="2022-01-18T08:58:05.550Z">
+<meta property="article:modified_time" content="2022-01-08T08:49:28.522Z">
+<meta property="article:author" content="wuyi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://example.com/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%A6%81%E7%82%B9/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'wuyi\'s blog',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-01-08 16:49:28'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="wuyi's blog" type="application/atom+xml">
+<link rel="stylesheet" href="/css/prism.css" type="text/css"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/touxiang.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><div class="data-item"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">4</div></a></div><div class="data-item"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">0</div></a></div><div class="data-item"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div></div><hr/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">wuyi's blog</a></span><div id="menus"><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">No title</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2022-01-18T08:58:05.550Z" title="Created 2022-01-18 16:58:05">2022-01-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2022-01-08T08:49:28.522Z" title="Updated 2022-01-08 16:49:28">2022-01-08</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="1-1-5中断和异常"><a href="#1-1-5中断和异常" class="headerlink" title="1.1_5中断和异常"></a>1.1_5中断和异常</h3><p>用户态-》核心态：中断是<strong>唯一途径</strong></p>
+<p>核心态-》用户态：通过特权指令，将程序状态字（PSW）的标志位设置为用户态。</p>
+<p>中断分类：</p>
+<p>内中断：CPU内部发生（异常、陷入、例外）</p>
+<p>外中断：用户干预或外设请求</p>
+<h3 id="2-2-3调度算法的评价指标"><a href="#2-2-3调度算法的评价指标" class="headerlink" title="2.2_3调度算法的评价指标"></a>2.2_3调度算法的评价指标</h3><h4 id="1-CPU利用率"><a href="#1-CPU利用率" class="headerlink" title="1.CPU利用率"></a>1.CPU利用率</h4><p>利用率=CPU忙碌时间/总时间</p>
+<h4 id="2-系统吞吐量"><a href="#2-系统吞吐量" class="headerlink" title="2.系统吞吐量"></a>2.系统吞吐量</h4><p>指单位时间内完成作业的数量</p>
+<p>系统吞吐量=总共完成了多少道作业/总共花了多少时间（道/秒）</p>
+<h4 id="3-周转时间"><a href="#3-周转时间" class="headerlink" title="3.周转时间"></a>3.周转时间</h4><p>指作业被提交给系统开始，到作业完成为止的这段时间间隔。</p>
+<p>（作业）周转时间=作业完成时间-作业提交时间（到达时间）</p>
+<p>平均周转时间=各作业周转时间和/作业数</p>
+<p>带权周转时间=作业周转时间/作业实际运行时间</p>
+<h4 id="4-等待时间"><a href="#4-等待时间" class="headerlink" title="4.等待时间"></a>4.等待时间</h4><p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220101144409330.png" alt="image-20220101144409330"></p>
+<p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220101144447771.png" alt="image-20220101144447771"></p>
+<h4 id="5-响应时间"><a href="#5-响应时间" class="headerlink" title="5.响应时间"></a>5.响应时间</h4><p>从用户提出请求到首次响应所用的时间。</p>
+<h3 id="2-2-4调度算法"><a href="#2-2-4调度算法" class="headerlink" title="2.2_4调度算法"></a>2.2_4调度算法</h3><h4 id="1-先来先服务（FCFS）"><a href="#1-先来先服务（FCFS）" class="headerlink" title="1.先来先服务（FCFS）"></a>1.先来先服务（FCFS）</h4><p>“公平”</p>
+<p>用于<strong>作业</strong>调度时，考虑哪个作业先到达后备队列（外存中）；用于<strong>进程</strong>调度时，考虑哪个进程先到达就绪队列。</p>
+<p><strong>非抢占式算法</strong></p>
+<p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220101145440921.png" alt="image-20220101145440921"></p>
+<p>不会导致饥饿</p>
+<h4 id="2-短作业优先（SJF）"><a href="#2-短作业优先（SJF）" class="headerlink" title="2.短作业优先（SJF）"></a>2.短作业优先（SJF）</h4><p>每次调度时选择<strong>当前已到达</strong>且运行时间最短的作业/进程。运行时间一样时先调度先到达的。</p>
+<p>可使用抢占式的短作业优先（最短剩余时间优先算法）</p>
+<p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220101150642298.png" alt="image-20220101150642298"></p>
+<p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220101152013452.png" alt="image-20220101152013452"></p>
+<h4 id="3-高响应比优先"><a href="#3-高响应比优先" class="headerlink" title="3.高响应比优先"></a>3.高响应比优先</h4><p>响应比=（等待时间+要求服务时间（运行时间））/要求服务时间</p>
+<p>在每次调度时选择响应比最高的为其服务</p>
+<p><strong>非抢占式</strong></p>
+<h3 id="2-2-5调度算法"><a href="#2-2-5调度算法" class="headerlink" title="2.2_5调度算法"></a>2.2_5调度算法</h3><h4 id="1-时间片轮转"><a href="#1-时间片轮转" class="headerlink" title="1.时间片轮转"></a>1.时间片轮转</h4><p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220108141550050.png" alt="image-20220108141550050"></p>
+<h4 id="2-优先级"><a href="#2-优先级" class="headerlink" title="2.优先级"></a>2.优先级</h4><p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220108142350903.png" alt="image-20220108142350903"></p>
+<h4 id="3-多级反馈队列"><a href="#3-多级反馈队列" class="headerlink" title="3.多级反馈队列"></a>3.多级反馈队列</h4><p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220108143258368.png" alt="image-20220108143258368"></p>
+<p>总结：</p>
+<p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220108143337846.png" alt="image-20220108143337846"></p>
+<h3 id="2-3-1进程同步、互斥"><a href="#2-3-1进程同步、互斥" class="headerlink" title="2.3_1进程同步、互斥"></a>2.3_1进程同步、互斥</h3><p>临界资源：一个时间段内只允许一个进程使用。</p>
+<h3 id="2-4-1死锁的概念"><a href="#2-4-1死锁的概念" class="headerlink" title="2.4_1死锁的概念"></a>2.4_1死锁的概念</h3><p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20220108164925332.png" alt="image-20220108164925332"></p>
+<h3 id="3-1-1内存的基础知识"><a href="#3-1-1内存的基础知识" class="headerlink" title="3.1_1内存的基础知识"></a>3.1_1内存的基础知识</h3><p>​    内存是用于存放数据的硬件，<strong>程序执行前需要先放到内存中才能被CPU处理</strong>。</p>
+<ul>
+<li>若计算机<strong>按字节编址</strong>，则每个存储单元大小为<strong>1字节</strong>，即1B，即8个二进制位。</li>
+<li>若字长为16位（现多为32或64位）的计算机<strong>按字编址</strong>，则每个存储单元大小为<strong>1个字</strong>，即16个二进制位。</li>
+</ul>
+<p>三种装入方式：</p>
+<ul>
+<li>绝对装入：只适用于单道程序环境，且完全有可能知道程序将驻留在内存中的什么位置时使用，将产生绝对地址（物理地址）的目标代码。</li>
+<li>可重定位装入：多道程序环境，可根据具体情况，将装入模块装入到内存的适当位置，在装入时对地址进行“重定位”，将逻辑地址（相对地址）变换为物理地址。</li>
+<li>动态运行时装入：动态运行的装入程序把转入模块装入内存之后，并不立即把装入模块的逻辑地址进行转换，而是把这种地址转换推迟到程序执行时才进行，装入内存后的所有地址都仍是逻辑地址。这种方式需要重定位寄存器的支持：在重定位寄存器中存放装入模块的<strong>起始位置</strong>。</li>
+</ul>
+<h3 id="3-1-3覆盖与交换"><a href="#3-1-3覆盖与交换" class="headerlink" title="3.1_3覆盖与交换"></a>3.1_3覆盖与交换</h3><h4 id="1-覆盖"><a href="#1-覆盖" class="headerlink" title="1.覆盖"></a>1.覆盖</h4><p>用于”解决程序大小超过物理内存总和“的问题。</p>
+<p>思想：将程序分为多个段，常用的段常驻内存，不常用的段在需要时调入内存。</p>
+<p>内存分为一个“固定区”和若干个“覆盖区”。</p>
+<p>需要常驻内存的段放在固定区。调入后不再调出（除非运行结束）。</p>
+<p>不常用的段放在覆盖区，需要时调入内存，不需要时调出。</p>
+<h4 id="2-交换"><a href="#2-交换" class="headerlink" title="2.交换"></a>2.交换</h4><p>内存紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程换入内存（进程在内存与磁盘间动态调度）。</p>
+<p>1.通常将磁盘空间分为交换区和文件区，文件区用于<strong>存放文件</strong>，<strong>主要追求存储空间的利用率</strong>，因此对文件区空间的管理常采用离散分配方式；对换区空间只占磁盘空间的小部分，存放被<strong>换出的进程数据</strong>，对换速度直接影响系统的整体速度，因此对换区<strong>主要追求换入换出的速度</strong>，因此常采用<strong>连续分配方式</strong>。<strong>对换区的I/O速度比文件区块。</strong></p>
+<h3 id="3-1-5动态分区分配算法"><a href="#3-1-5动态分区分配算法" class="headerlink" title="3.1_5动态分区分配算法"></a>3.1_5动态分区分配算法</h3><h4 id="1-首次适应算法"><a href="#1-首次适应算法" class="headerlink" title="1.首次适应算法"></a>1.首次适应算法</h4><p><strong>算法思想：</strong>每次都从低地址开始查找，找到第一个能够满足大小的空闲分区。</p>
+<p><strong>实现：</strong>空闲分区以地址递增的次序排列。每次分配内存时顺序查找空闲分区链（或空闲分区表），找到大小能满足要求的第一个空闲分区。</p>
+<p><strong>优点：</strong>算法开销小，回收分区后一般不需要对空闲分区队列重新排列。</p>
+<h4 id="2-最佳适应算法"><a href="#2-最佳适应算法" class="headerlink" title="2.最佳适应算法"></a>2.最佳适应算法</h4><p><strong>算法思想：</strong>由于动态分区分配是一种连续分配方法，为各进程分配的空间必须是连续分配方式，为各进程分配的空间必须是连续的一整片区域。因此为了保证当“大进程”到来时能有连续的大片空间，可以尽可能多的留下大片的空闲区，即优先使用更小的空闲区。</p>
+<p><strong>如何实现：</strong>空闲分区按容量递增次序链接。每次分配内存时顺序查找空闲分区链，找到大小能满足要求的第一个空闲分区。</p>
+<p><strong>优点：</strong></p>
+<p>会有更多的大分区被保留下来，更能满足大进程的需求。</p>
+<p><strong>缺点：</strong></p>
+<p>每次都选最小的分区进行分配，会留下越来越多的、很小的、难以利用的内存块。因此这种方法会产生很多的外部碎片。</p>
+<h4 id="3-最坏适应算法"><a href="#3-最坏适应算法" class="headerlink" title="3.最坏适应算法"></a>3.最坏适应算法</h4><p><strong>算法思想：</strong></p>
+<p>为了解决最佳适应算法的问题–即留下太多难以利用的小碎片，可以对每次分配时优先使用最大的连续空闲区，这样分配后剩余的空间去就不会太小，更方便使用。</p>
+<p><strong>如何实现：</strong></p>
+<p>空闲分区按容量递减次序链接。每次分配内存时顺序查找空闲分区链（或空闲分区表），找到大小能满足要求的第一个空闲分区。</p>
+<p><strong>优点：</strong></p>
+<p>可以减少难以利用的小碎片。</p>
+<p><strong>缺点：</strong></p>
+<p>每次都选最大的分区进行分配，虽然可以让分配后留下的空闲区更大，更可用，但是这种方式会导致较大的连续空闲区被迅速用完。如果之后有“大进程”到达就没有内存分配可用了。</p>
+<h4 id="4-临近适应算法"><a href="#4-临近适应算法" class="headerlink" title="4.临近适应算法"></a>4.临近适应算法</h4><p><strong>算法思想：</strong></p>
+<p>首次适应算法每次都从链头开始查找，这可能会导致低地址部分出现很多小的空间分区，而每次分配查找是，都要经过这些分区，因此也增加了查找的开销。如果每次都从上次查找结束的位置开始检索就能解决上述问题。</p>
+<p><strong>如何实现：</strong></p>
+<p>空闲分区以地址递增的顺序排列。每次分配内存时从上次查找结束的位置开始查找空闲分区链（或空闲分区表），找到大小能满足要求的第一个空闲分区。</p>
+<p><strong>优点：</strong></p>
+<p>不用每次都从低地址的小分区开始检索，算法开销小。</p>
+<p><strong>缺点：</strong></p>
+<p>会使高地址的大分区也被用完。</p>
+<p>首次适应算法每次都要从头查找，每次都需要检索低地址的小分区。但是这种规则也决定了当低地址部分有更小的分区可以满足需求时，会更有可能用到低地址部分的小分区，也会更有可能把高地址部分的大分区保留下来（最佳适应算法的优点）。</p>
+<p>邻近适应算法的规则可能会导致无论低地址、高地址部分的空闲分区都有相同的概率被使用，也就导致了高地址部分的大分区更有可能被使用，划分成为小分区，最后导致无大分区可用（最大适应算法的缺点）。</p>
+<p>综上，首次适应算法的效果反而最好。</p>
+<p><img src="C:\Users\Y\AppData\Roaming\Typora\typora-user-images\image-20211226215810088.png" alt="image-20211226215810088"></p>
+<h3 id="3-1-6基本分页存储管理概念"><a href="#3-1-6基本分页存储管理概念" class="headerlink" title="3.1_6基本分页存储管理概念"></a>3.1_6基本分页存储管理概念</h3></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">wuyi</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="http://example.com/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%A6%81%E7%82%B9/">http://example.com/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%A6%81%E7%82%B9/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/"><img class="next-cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info"></div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">wuyi</div><div class="author-info__description"></div></div><div class="card-info-data is-center"><div class="card-info-data-item"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">4</div></a></div><div class="card-info-data-item"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">0</div></a></div><div class="card-info-data-item"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Ynt233"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-5%E4%B8%AD%E6%96%AD%E5%92%8C%E5%BC%82%E5%B8%B8"><span class="toc-number">1.</span> <span class="toc-text">1.1_5中断和异常</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-3%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95%E7%9A%84%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87"><span class="toc-number">2.</span> <span class="toc-text">2.2_3调度算法的评价指标</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-CPU%E5%88%A9%E7%94%A8%E7%8E%87"><span class="toc-number">2.1.</span> <span class="toc-text">1.CPU利用率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E7%B3%BB%E7%BB%9F%E5%90%9E%E5%90%90%E9%87%8F"><span class="toc-number">2.2.</span> <span class="toc-text">2.系统吞吐量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%91%A8%E8%BD%AC%E6%97%B6%E9%97%B4"><span class="toc-number">2.3.</span> <span class="toc-text">3.周转时间</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E7%AD%89%E5%BE%85%E6%97%B6%E9%97%B4"><span class="toc-number">2.4.</span> <span class="toc-text">4.等待时间</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E5%93%8D%E5%BA%94%E6%97%B6%E9%97%B4"><span class="toc-number">2.5.</span> <span class="toc-text">5.响应时间</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-4%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">2.2_4调度算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%85%88%E6%9D%A5%E5%85%88%E6%9C%8D%E5%8A%A1%EF%BC%88FCFS%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">1.先来先服务（FCFS）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E7%9F%AD%E4%BD%9C%E4%B8%9A%E4%BC%98%E5%85%88%EF%BC%88SJF%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">2.短作业优先（SJF）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E9%AB%98%E5%93%8D%E5%BA%94%E6%AF%94%E4%BC%98%E5%85%88"><span class="toc-number">3.3.</span> <span class="toc-text">3.高响应比优先</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-5%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">2.2_5调度算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%97%B6%E9%97%B4%E7%89%87%E8%BD%AE%E8%BD%AC"><span class="toc-number">4.1.</span> <span class="toc-text">1.时间片轮转</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">4.2.</span> <span class="toc-text">2.优先级</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%A4%9A%E7%BA%A7%E5%8F%8D%E9%A6%88%E9%98%9F%E5%88%97"><span class="toc-number">4.3.</span> <span class="toc-text">3.多级反馈队列</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%AD%A5%E3%80%81%E4%BA%92%E6%96%A5"><span class="toc-number">5.</span> <span class="toc-text">2.3_1进程同步、互斥</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-1%E6%AD%BB%E9%94%81%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">6.</span> <span class="toc-text">2.4_1死锁的概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-1%E5%86%85%E5%AD%98%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-number">7.</span> <span class="toc-text">3.1_1内存的基础知识</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-3%E8%A6%86%E7%9B%96%E4%B8%8E%E4%BA%A4%E6%8D%A2"><span class="toc-number">8.</span> <span class="toc-text">3.1_3覆盖与交换</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E8%A6%86%E7%9B%96"><span class="toc-number">8.1.</span> <span class="toc-text">1.覆盖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%BA%A4%E6%8D%A2"><span class="toc-number">8.2.</span> <span class="toc-text">2.交换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-5%E5%8A%A8%E6%80%81%E5%88%86%E5%8C%BA%E5%88%86%E9%85%8D%E7%AE%97%E6%B3%95"><span class="toc-number">9.</span> <span class="toc-text">3.1_5动态分区分配算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E9%A6%96%E6%AC%A1%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><span class="toc-number">9.1.</span> <span class="toc-text">1.首次适应算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%9C%80%E4%BD%B3%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><span class="toc-number">9.2.</span> <span class="toc-text">2.最佳适应算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%9C%80%E5%9D%8F%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><span class="toc-number">9.3.</span> <span class="toc-text">3.最坏适应算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E4%B8%B4%E8%BF%91%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><span class="toc-number">9.4.</span> <span class="toc-text">4.临近适应算法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-6%E5%9F%BA%E6%9C%AC%E5%88%86%E9%A1%B5%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E6%A6%82%E5%BF%B5"><span class="toc-number">10.</span> <span class="toc-text">3.1_6基本分页存储管理概念</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%A6%81%E7%82%B9/" title="No title"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="No title"/></a><div class="content"><a class="title" href="/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%A6%81%E7%82%B9/" title="No title">No title</a><time datetime="2022-01-18T08:58:05.550Z" title="Created 2022-01-18 16:58:05">2022-01-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/" title="No title"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="No title"/></a><div class="content"><a class="title" href="/2022/01/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/" title="No title">No title</a><time datetime="2022-01-18T08:57:25.049Z" title="Created 2022-01-18 16:57:25">2022-01-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/18/%E6%95%B0%E5%AD%97%E5%9B%BE%E5%BD%A2%E5%A4%84%E7%90%86%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/" title="No title"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="No title"/></a><div class="content"><a class="title" href="/2022/01/18/%E6%95%B0%E5%AD%97%E5%9B%BE%E5%BD%A2%E5%A4%84%E7%90%86%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/" title="No title">No title</a><time datetime="2022-01-18T08:57:00.124Z" title="Created 2022-01-18 16:57:00">2022-01-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/01/18/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" title="第一篇博客"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="第一篇博客"/></a><div class="content"><a class="title" href="/2022/01/18/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" title="第一篇博客">第一篇博客</a><time datetime="2022-01-18T05:47:05.000Z" title="Created 2022-01-18 13:47:05">2022-01-18</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By wuyi</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
